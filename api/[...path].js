@@ -1,5 +1,5 @@
 /**
- * Vercel Serverless Function - API Entry Point
+ * Vercel Serverless Function - API Entry Point (Catch-all route)
  * Handles API requests for the DevOps AI landing page
  */
 
@@ -13,7 +13,9 @@ function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { path } = req.query;
+  // Get path from catch-all route parameter (array) or query
+  const pathArray = req.query?.path;
+  const path = Array.isArray(pathArray) ? pathArray[0] : pathArray || null;
 
   // API endpoints
   if (path === "health") {
@@ -93,7 +95,7 @@ function handler(req, res) {
     });
   }
 
-  // Default response
+  // Default response for /api root
   return res.status(200).json({
     name: "DevOps AI API",
     version: "1.0.0",
