@@ -11,7 +11,7 @@
     "cli:old": "ts-node src/cli/index.ts",
     "desktop": "scripts\\devops-ai-desktop.bat",
     "desktop:unix": "bash scripts/devops-ai-desktop.sh",
-    "build": "echo 'No build needed for Vercel deployment'",
+    "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
