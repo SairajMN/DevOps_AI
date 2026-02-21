@@ -1,6 +1,6 @@
 # DevOps Log Intelligence & Auto-Triage System
 
-A local-first, deterministic-first, AI-assisted log intelligence system for automated error detection, classification, and fix suggestion.
+A local-first, deterministic-first, AI-assisted log intelligence system for automated error detection, classification, and fix suggestion. Now with **OpenRouter AI Integration** for advanced LLM-powered analysis.
 
 ## 🎯 Overview
 
@@ -12,10 +12,12 @@ This system provides intelligent log analysis capabilities:
 - **Proposes** deterministic fixes
 - **Generates** structured patch suggestions
 - **Stores** historical resolution memory
+- **AI-Powered Analysis** via OpenRouter (DeepSeek, Llama, Mistral, Qwen, Gemini)
 - **Requests** manual approval before any action
 
 ## 🏗️ Architecture
 
+### Core Pipeline
 ```
 Project Folder
       ↓
@@ -36,30 +38,72 @@ Incident Memory Store
 Report Builder
 ```
 
+### AI Integration Architecture
+```
+User Request
+      ↓
+API (Express Server)
+      ↓
+Accomplish Agent (Orchestrator)
+      ↓
+Tool Layer
+   ├── Log Parser
+   ├── Shell Executor
+   ├── Git Tool
+   ├── File System
+      ↓
+OpenRouter LLM Layer
+   ├── DeepSeek R1 (reasoning)
+   ├── DeepSeek Chat (code)
+   ├── Qwen 2.5 (fallback)
+   ├── Llama 3.1 8B (documentation)
+   ├── Mistral 7B (quick tasks)
+   ├── Gemini Flash 1.5 (general)
+      ↓
+Response + Suggested Fix
+```
+
 ## 📁 Project Structure
 
 ```
 devops-intelligence/
-├── app/                    # Application orchestration
-├── engine/                 # Log monitoring engine
-├── parsers/                # Log parsing modules
-├── classifiers/            # Error classification
-├── analyzers/              # Codebase analysis
-├── fixes/                  # Fix generation engine
-├── patches/                # Patch generation
+├── src/                    # TypeScript AI Integration
+│   ├── ai/                 # AI/LLM Layer
+│   │   ├── models.ts       # Model registry
+│   │   ├── modelRouter.ts  # Smart model selection
+│   │   └── openrouterClient.ts  # OpenRouter API client
+│   ├── agent/              # Agent orchestration
+│   │   ├── accomplishAgent.ts   # Main agent
+│   │   ├── taskOrchestrator.ts  # Task management
+│   │   └── prompts.ts      # Production-grade prompts
+│   ├── routes/             # API routes
+│   │   └── analyze.ts      # Analysis endpoints
+│   └── index.ts            # Express server entry
+├── analyzer/               # Codebase analysis
+├── classifier/             # Error classification
+├── fix_engine/             # Fix generation engine
 ├── memory/                 # Incident memory store
+├── parser/                 # Log parsing modules
+├── patch/                  # Patch generation
 ├── reports/                # Report generation
-├── config/                 # Configuration files
+├── watcher/                # Log monitoring
 ├── logs/                   # Log files to analyze
 ├── storage/                # Persistent storage
 ├── test/                   # Test files
-├── main.py                 # Main entry point
+├── main.py                 # Python main entry
 ├── cli.py                  # CLI interface
 ├── config.py               # Configuration module
+├── package.json            # Node.js dependencies
+├── tsconfig.json           # TypeScript config
 └── requirements.txt        # Python dependencies
 ```
 
 ## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Python 3.8+
+- OpenRouter API Key (get one at [openrouter.ai](https://openrouter.ai))
 
 ### Installation
 
@@ -68,15 +112,33 @@ devops-intelligence/
 git clone https://github.com/SairajMN/DevOps_AI.git
 cd DevOps_AI
 
-# Create virtual environment
+# Install Node.js dependencies
+npm install
+
+# Create virtual environment for Python
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your OPENROUTER_API_KEY
 ```
 
-### Basic Usage
+### Running the AI Server
+
+```bash
+# Development mode
+npm run dev
+
+# Build and run production
+npm run build
+npm start
+```
+
+### Using the CLI
 
 ```bash
 # Show system status
@@ -93,9 +155,88 @@ python cli.py history --limit 20
 
 # Generate a report
 python cli.py report --type summary
+```
 
-# View patches
-python cli.py patch --list
+## 🔌 API Endpoints
+
+### Server runs on `http://localhost:3000` by default
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | API info |
+| `/api/health` | GET | Health check |
+| `/api/models` | GET | List available AI models |
+| `/api/models/:modelId` | GET | Get model details |
+| `/api/analyze` | POST | Full log analysis |
+| `/api/analyze/quick` | POST | Quick analysis |
+| `/api/analyze/multi` | POST | Multi-step analysis |
+| `/api/analyze/batch` | POST | Batch analysis |
+| `/api/fix` | POST | Code fix generation |
+| `/api/tasks` | POST | Create task |
+| `/api/tasks/:taskId` | GET | Get task status |
+| `/api/tasks/:taskId/execute` | POST | Execute task |
+| `/api/queue` | GET | Get queue status |
+
+### Example API Calls
+
+```bash
+# Analyze a log
+curl -X POST http://localhost:3000/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"log": "ERROR: Connection timeout at database.py:45"}'
+
+# Quick analysis
+curl -X POST http://localhost:3000/api/analyze/quick \
+  -H "Content-Type: application/json" \
+  -d '{"log": "TypeError: Cannot read property of undefined"}'
+
+# Generate code fix
+curl -X POST http://localhost:3000/api/fix \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "def add(a, b):\n    return a + b",
+    "errorMessage": "TypeError: unsupported operand type",
+    "language": "python"
+  }'
+
+# Get available models
+curl http://localhost:3000/api/models
+```
+
+## 🤖 AI Models
+
+### Available Models via OpenRouter
+
+| Model ID | Name | Best For |
+|----------|------|----------|
+| `deepseek-r1` | DeepSeek R1 | Reasoning, debugging, log analysis |
+| `deepseek-v3` | DeepSeek V3 | Code generation, refactoring |
+| `llama-70b` | Llama 3.1 8B | Documentation, general tasks |
+| `mixtral` | Mistral 7B | Quick fallback, Python/JS |
+| `qwen` | Qwen 2.5 7B | Coding, reasoning |
+| `gemini-flash` | Gemini Flash 1.5 | Fast general tasks |
+
+### Smart Model Selection
+
+The system automatically selects the best model based on task type:
+
+```typescript
+// Automatic selection
+Task Type          → Model
+─────────────────────────────
+log-analysis       → DeepSeek R1
+debugging          → DeepSeek R1
+code-generation    → DeepSeek V3
+documentation      → Llama 3.1 8B
+quick-fallback     → Mistral 7B
+```
+
+### Fallback Chain
+
+If the primary model fails, the system automatically falls back:
+
+```
+Primary → Fallback 1 → Fallback 2
 ```
 
 ## 📋 CLI Commands
@@ -106,19 +247,11 @@ python cli.py patch --list
 python cli.py monitor --paths /path/to/log1.log /path/to/log2.log --project .
 ```
 
-Options:
-- `--paths`: Log file paths to monitor
-- `--project`: Project directory for context analysis
-
 ### `analyze` - Analyze Log File
 
 ```bash
 python cli.py analyze --file error.log --format json
 ```
-
-Options:
-- `--file`: Log file to analyze (required)
-- `--format`: Output format (`json` or `text`)
 
 ### `report` - Generate Reports
 
@@ -127,19 +260,11 @@ python cli.py report --type trend
 python cli.py report --incident incident_20260221_abc123
 ```
 
-Options:
-- `--incident`: Generate report for specific incident
-- `--type`: Report type (`summary` or `trend`)
-
 ### `history` - View Incident History
 
 ```bash
 python cli.py history --limit 20 --type database_errors
 ```
-
-Options:
-- `--limit`: Number of incidents to show
-- `--type`: Filter by error type
 
 ### `patch` - Patch Management
 
@@ -149,45 +274,30 @@ python cli.py patch --view patch_20260221_1234
 python cli.py patch --approve patch_20260221_1234
 ```
 
-Options:
-- `--list`: List all patches
-- `--view`: View a specific patch
-- `--approve`: Approve a patch for application
-
-### `clear` - Clear Memory
-
-```bash
-python cli.py clear --confirm
-```
-
-### `status` - System Status
-
-```bash
-python cli.py status
-```
-
 ## 🔧 Configuration
 
-Configuration is managed through `config.py` and supports:
+### Environment Variables (.env)
 
-### Log Configuration
+```bash
+# Required
+OPENROUTER_API_KEY=your-key-here
+
+# Server
+PORT=3000
+HOST=0.0.0.0
+NODE_ENV=development
+
+# Optional
+LOG_LEVEL=info
+DEFAULT_MODEL=deepseek/deepseek-r1
+```
+
+### Python Configuration (config.py)
+
 - `log_paths`: Paths to monitor for log files
 - `log_patterns`: Patterns to identify error logs
 - `poll_interval`: Monitoring poll interval
-
-### Parser Configuration
-- `enable_structured`: Enable structured parsing
-- `enable_patterns`: Enable pattern matching
-
-### Classifier Configuration
-- `enable_ml`: Enable ML-based classification
-- `enable_rules`: Enable rule-based classification
 - `confidence_threshold`: Minimum confidence threshold
-
-### Memory Configuration
-- `storage_file`: Path to incident storage file
-- `max_incidents`: Maximum incidents to store
-- `retention_days`: Days to retain incidents
 
 ## 🎯 Supported Environments
 
@@ -201,8 +311,6 @@ Configuration is managed through `config.py` and supports:
 
 ## 📊 Error Categories
 
-The system detects and classifies:
-
 | Category | Examples |
 |----------|----------|
 | `database_errors` | Connection timeout, deadlock, constraint violation |
@@ -214,15 +322,13 @@ The system detects and classifies:
 ## 🔒 Security Model
 
 - ✅ Fully local execution
-- ✅ No external API calls by default
 - ✅ No auto patch application
 - ✅ No arbitrary command execution
 - ✅ Suggested commands are sandboxed text only
 - ✅ Explicit approval required for all actions
+- ✅ API key stored in environment variables
 
 ## 📈 Confidence Scoring
-
-Confidence is computed from:
 
 ```
 confidence = 
@@ -239,53 +345,80 @@ Thresholds:
 ## 🧪 Testing
 
 ```bash
+# Run TypeScript integration tests
+npx ts-node test/test-integration.ts
+
 # Run with sample log file
 python cli.py analyze --file logs/sample_errors.log --format text
 
 # Check system status
 python cli.py status
+
+# Type check
+npm run typecheck
 ```
 
-## 📝 Output Formats
+## 📝 Response Format
 
-### JSON Report
+### Log Analysis Response
+
 ```json
 {
-  "summary": {
-    "log_file": "error.log",
-    "total_lines": 100,
-    "errors_found": 15,
-    "report_id": "report_20260221_1234"
+  "success": true,
+  "analysis": {
+    "error_type": "ModuleNotFoundError",
+    "error_category": "dependency",
+    "root_cause": "Missing psycopg2 module in Python environment",
+    "confidence": 92,
+    "suggested_fix": "Install psycopg2-binary package",
+    "step_by_step_fix": [
+      "Run: pip install psycopg2-binary",
+      "Or add to requirements.txt",
+      "Restart the application"
+    ],
+    "is_environment_issue": false,
+    "is_dependency_issue": true,
+    "is_code_issue": false,
+    "affected_files": ["database.py"],
+    "severity": "high"
   },
-  "results": [...]
+  "metadata": {
+    "model": "deepseek/deepseek-r1",
+    "duration": 2340,
+    "attempts": 1
+  }
 }
 ```
 
-### Patch Format
-```diff
---- a/file.py
-+++ b/file.py
-@@ -1,5 +1,5 @@
--    connect_timeout = 30
-+    connect_timeout = 60
-```
+## 🔄 Integration with Existing Python Pipeline
 
-## 🔄 Pipeline Flow
+The TypeScript AI layer integrates seamlessly with the existing Python pipeline:
 
-1. **Log Watcher** detects new log entries
-2. **Parser** converts raw logs to structured format
-3. **Classifier** categorizes errors with confidence scores
-4. **Analyzer** examines codebase for context
-5. **Fix Engine** generates deterministic fix suggestions
-6. **Patch Generator** creates unified diff patches
-7. **Memory** stores incident for future reference
-8. **Report Builder** generates comprehensive reports
+1. **Python Pipeline** handles local log watching, parsing, and deterministic fixes
+2. **TypeScript AI Layer** provides advanced LLM-powered analysis via OpenRouter
+3. Both can run independently or together
 
 ## 🛠️ Extending the System
 
+### Adding Custom AI Models
+
+Edit `src/ai/models.ts`:
+
+```typescript
+{
+    id: "custom-model",
+    name: "Custom Model",
+    model: "provider/model-name",
+    description: "Description",
+    strengths: ["strength1", "strength2"],
+    maxTokens: 4096,
+    taskTypes: ["task-type-1", "task-type-2"]
+}
+```
+
 ### Adding Custom Patterns
 
-Edit `parser/patterns.py` to add new log patterns:
+Edit `parser/patterns.py`:
 
 ```python
 ParsePattern(
@@ -297,37 +430,19 @@ ParsePattern(
 )
 ```
 
-### Adding Fix Rules
+## 📚 Tech Stack
 
-Edit `fix_engine/deterministic_fix_engine.py`:
+### TypeScript/Node.js
+- Express.js - API server
+- Axios - HTTP client
+- Zod - Schema validation
+- TypeScript - Type safety
 
-```python
-'custom_errors': [
-    {
-        'name': 'custom_fix',
-        'pattern': r'your-error-pattern',
-        'fix_type': 'code',
-        'description': 'Fix description',
-        'changes': [...],
-        'confidence': 0.8,
-        'risk_level': 'LOW'
-    }
-]
-```
-
-## 📚 API Reference
-
-### Core Classes
-
-- `DevOpsAISystem`: Main orchestrator
-- `LogWatcher`: File monitoring
-- `StructuredParser`: Log parsing
-- `ErrorClassifier`: Error classification
-- `CodebaseAnalyzer`: Context analysis
-- `DeterministicFixEngine`: Fix generation
-- `PatchGenerator`: Patch creation
-- `IncidentMemory`: Incident storage
-- `ReportBuilder`: Report generation
+### Python
+- asyncio - Async operations
+- watchdog - File monitoring
+- Jinja2 - Templating
+- markdown - Report generation
 
 ## 🤝 Contributing
 
@@ -344,19 +459,7 @@ MIT License - See LICENSE file for details.
 ## 🙏 Acknowledgments
 
 Built with:
-- Python 3.8+
-- asyncio for async operations
-- watchdog for file monitoring
-- Jinja2 for templating
-- markdown for report generation
-</task_progress>
-<task_progress>
-- [x] Explore existing codebase structure
-- [x] Review all core modules
-- [x] Create CLI interface
-- [x] Create requirements.txt
-- [x] Create sample log files for testing
-- [x] Update README.md with documentation
-- [ ] Test the complete pipeline
-</task_progress>
-</write_to_file>
+- **AI Models**: DeepSeek, Llama, Mistral, Qwen, Gemini (via OpenRouter)
+- **Runtime**: Node.js + Python
+- **Frameworks**: Express, asyncio
+- **Monitoring**: watchdog

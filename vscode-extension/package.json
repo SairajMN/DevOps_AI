@@ -1,0 +1,169 @@
+{
+  "name": "devops-ai",
+  "displayName": "DevOps AI - Log Intelligence",
+  "description": "AI-powered DevOps assistant with chat interface. Analyze logs, fix code, run tests with natural language.",
+  "version": "1.0.0",
+  "publisher": "devops-ai",
+  "engines": {
+    "vscode": "^1.85.0",
+    "node": ">=18.0.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Debuggers",
+    "Machine Learning",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "icon": "icon.png",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devopsAi",
+          "title": "DevOps AI",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "devopsAi": [
+        {
+          "type": "webview",
+          "id": "devopsAi.chatView",
+          "name": "Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "devops-ai.openProject",
+        "title": "DevOps AI: Open Project"
+      },
+      {
+        "command": "devops-ai.runTests",
+        "title": "DevOps AI: Run Tests"
+      },
+      {
+        "command": "devops-ai.buildProject",
+        "title": "DevOps AI: Build Project"
+      },
+      {
+        "command": "devops-ai.installDeps",
+        "title": "DevOps AI: Install Dependencies"
+      },
+      {
+        "command": "devops-ai.analyzeFile",
+        "title": "DevOps AI: Analyze Current File"
+      },
+      {
+        "command": "devops-ai.fixCode",
+        "title": "DevOps AI: Fix Code"
+      },
+      {
+        "command": "devops-ai.quickChat",
+        "title": "DevOps AI: Quick Chat"
+      },
+      {
+        "command": "devops-ai.status",
+        "title": "DevOps AI: Check Status"
+      },
+      {
+        "command": "devops-ai.startServer",
+        "title": "DevOps AI: Start Server"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "devops-ai.analyzeFile",
+          "group": "devops-ai@1"
+        },
+        {
+          "command": "devops-ai.fixCode",
+          "when": "editorLangId == python || editorLangId == javascript || editorLangId == typescript",
+          "group": "devops-ai@2"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "devops-ai.analyzeFile",
+          "group": "navigation@1"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "devops-ai.quickChat",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d"
+      },
+      {
+        "command": "devops-ai.analyzeFile",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      },
+      {
+        "command": "devops-ai.fixCode",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f"
+      }
+    ],
+    "configuration": {
+      "title": "DevOps AI",
+      "properties": {
+        "devops-ai.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "description": "URL of the DevOps AI server"
+        },
+        "devops-ai.defaultModel": {
+          "type": "string",
+          "default": "deepseek-r1",
+          "enum": [
+            "deepseek-r1",
+            "deepseek-v3",
+            "llama-70b",
+            "mixtral",
+            "qwen",
+            "gemini-flash"
+          ],
+          "description": "Default AI model to use"
+        },
+        "devops-ai.autoAnalyze": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically analyze logs when opened"
+        },
+        "devops-ai.showInlineDiagnostics": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline diagnostics for detected errors"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc",
+    "watch": "tsc -watch",
+    "pretest": "npm run compile",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

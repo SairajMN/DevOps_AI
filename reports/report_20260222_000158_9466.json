@@ -1,0 +1,14 @@
+{
+  "report_metadata": {
+    "generated_at": "2026-02-22T00:01:58.804306",
+    "version": "1.0.0",
+    "analysis_data": {
+      "error_context": [],
+      "common_patterns": {},
+      "suggested_fixes": [],
+      "log_file": "logs/sample_errors.log",
+      "total_lines": 15,
+      "errors_found": 15
+    }
+  }
+}

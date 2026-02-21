@@ -1,0 +1,27 @@
+<h1>DevOps AI Error Analysis Report</h1>
+<p><strong>Generated on:</strong> 2026-02-21 19:03:49</p>
+<h2>Summary Statistics</h2>
+<ul>
+<li><strong>Total Errors:</strong> 0</li>
+<li><strong>Unique Files:</strong> 0</li>
+<li><strong>Common Patterns:</strong> 0</li>
+<li><strong>Suggested Fixes:</strong> 0</li>
+</ul>
+<h2>Error Analysis</h2>
+<h2>Common Patterns</h2>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Occurrences</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>Suggested Fixes</h2>
+<h2>Risk Assessment</h2>

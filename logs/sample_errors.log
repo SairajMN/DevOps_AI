@@ -1,0 +1,15 @@
+2026-02-21 10:15:32,456 - ERROR - database - Connection timeout to MySQL database
+2026-02-21 10:15:33,789 - ERROR - api - Failed to fetch user data: TypeError: Cannot read properties of undefined (reading 'map')
+2026-02-21 10:16:01,234 - CRITICAL - system - Out of memory error in worker process
+2026-02-21 10:16:45,567 - WARNING - network - Connection refused to redis://localhost:6379
+2026-02-21 10:17:22,890 - ERROR - auth - Authentication failed: Invalid token
+2026-02-21 10:18:05,123 - ERROR - database - SQL syntax error near 'SELECT * FORM users'
+2026-02-21 10:18:55,456 - FATAL - application - Null pointer exception in UserService.java
+2026-02-21 10:19:30,789 - ERROR - network - SSL certificate verification failed
+2026-02-21 10:20:15,012 - WARNING - cache - Redis connection pool exhausted
+2026-02-21 10:21:00,345 - ERROR - storage - Disk space insufficient on /var/data
+2026-02-21 10:21:45,678 - ERROR - api - HTTP 500 Internal Server Error at /api/users
+2026-02-21 10:22:30,901 - CRITICAL - database - Deadlock detected in transaction
+2026-02-21 10:23:15,234 - ERROR - application - Index out of range: array[10] accessed but length is 5
+2026-02-21 10:24:00,567 - WARNING - system - CPU usage above 90% threshold
+2026-02-21 10:24:45,890 - ERROR - auth - Session expired for user_id=12345

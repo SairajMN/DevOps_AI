@@ -1,0 +1,35 @@
+# Core Dependencies
+asyncio-compat>=0.1.0
+watchdog>=3.0.0
+
+# Data Processing
+python-dateutil>=2.8.2
+
+# Template Engine
+Jinja2>=3.1.2
+markdown>=3.5.0
+
+# Optional: AI/ML Support (for future enhancements)
+# openai>=1.0.0
+# google-generativeai>=0.3.0
+
+# Development Dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+flake8>=6.1.0
+black>=23.0.0
+mypy>=1.5.0
+
+# Type hints
+types-python-dateutil>=2.8.19
+</task_progress>
+<task_progress>
+- [x] Explore existing codebase structure
+- [x] Review all core modules
+- [x] Create CLI interface
+- [x] Create requirements.txt
+- [ ] Create sample log files for testing
+- [ ] Update README.md with documentation
+- [ ] Test the complete pipeline
+</task_progress>
+</write_to_file>
