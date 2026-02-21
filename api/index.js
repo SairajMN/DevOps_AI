@@ -3,7 +3,7 @@
  * Handles API requests for the DevOps AI landing page
  */
 
-module.exports = async function handler(req, res) {
+function handler(req, res) {
   // Enable CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -112,4 +112,6 @@ module.exports = async function handler(req, res) {
     ],
     message: "Deploy the full DevOps AI system for complete functionality",
   });
-};
+}
+
+module.exports = handler;
