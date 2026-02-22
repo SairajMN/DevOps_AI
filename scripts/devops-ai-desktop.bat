@@ -88,7 +88,7 @@ exit /b 1
 :cli
 echo 💬 Starting Interactive CLI...
 cd /d "%PROJECT_ROOT%"
-npx ts-node src/cli/cline-cli.ts "%PROJECT_PATH%"
+npx ts-node src/cli/agent.ts "%PROJECT_PATH%"
 goto :end
 
 :vscode
@@ -128,7 +128,7 @@ goto :end
 :analyze
 echo 📊 Analyzing logs...
 cd /d "%PROJECT_ROOT%"
-echo analyze logs | npx ts-node src/cli/cline-cli.ts "%PROJECT_PATH%"
+echo analyze logs | npx ts-node src/cli/agent.ts "%PROJECT_PATH%"
 goto :end
 
 :full

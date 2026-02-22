@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * DevOps AI CLI - Cline-like Interactive Interface
+ * DevOps AI CLI - Interactive Interface
  * Conversational AI assistant for DevOps tasks
  */
 export {};

@@ -93,7 +93,7 @@ case $choice in
     1)
         echo -e "${CYAN}💬 Starting Interactive CLI...${NC}"
         cd "$PROJECT_ROOT"
-        npx ts-node src/cli/cline-cli.ts "$PROJECT_PATH"
+        npx ts-node src/cli/agent.ts "$PROJECT_PATH"
         ;;
     2)
         echo -e "${CYAN}🖥️  Opening VS Code...${NC}"

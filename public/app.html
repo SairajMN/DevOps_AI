@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps AI - Task Manager & AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --darker: #020617;
+            --darkest: #000000;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #94a3b8;
+            --card-bg: #1e293b;
+            --border: rgba(99, 102, 241, 0.2);
+            --success: #22c55e;
+            --warning: #eab308;
+            --info: #3b82f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--dark);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            letter-spacing: 0.05em;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--gray-light);
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--light);
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+            border-left-color: var(--primary);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Model Selector in Sidebar */
+        .model-selector {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .model-selector label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+
+        .model-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .model-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--dark);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            gap: 0.5rem;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--light);
+            outline: none;
+            width: 200px;
+        }
+
+        .search-box input::placeholder {
+            color: var(--gray);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .btn-success {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--secondary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--gray-light);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .stat-icon.yellow {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .stat-icon.purple {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8b5cf6;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        /* Task List */
+        .task-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .task-filters {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .task-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .task-checkbox.checked {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .task-checkbox.checked i {
+            color: white;
+            font-size: 0.75rem;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .task-title.completed {
+            text-decoration: line-through;
+            color: var(--gray);
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .task-priority {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .priority-medium {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .priority-low {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .task-status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .status-running {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .status-completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .status-failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .task-item:hover .task-actions {
+            opacity: 1;
+        }
+
+        /* AI Chat Panel */
+        .ai-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 450px;
+            height: 100vh;
+            background: var(--dark);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .ai-panel.open {
+            transform: translateX(0);
+        }
+
+        .ai-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ai-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        .ai-status {
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .ai-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .message {
+            margin-bottom: 1.5rem;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .message-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .message-avatar.ai {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .message-avatar.user {
+            background: var(--card-bg);
+            color: var(--light);
+        }
+
+        .message-sender {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .message-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .message.user .message-content {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .ai-input-area {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .ai-input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .ai-input {
+            flex: 1;
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: var(--light);
+            font-size: 0.875rem;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .ai-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .ai-send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .ai-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* New Task Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--dark);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid var(--border);
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .modal-close:hover {
+            color: var(--light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-light);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--darker);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        /* Models Page */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .model-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .model-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .model-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .model-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .model-provider {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .model-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .model-badge {
+            padding: 0.25rem 0.5rem;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .model-description {
+            color: var(--gray);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .model-specs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray);
+        }
+
+        .model-spec {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .model-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .model-tag {
+            padding: 0.25rem 0.5rem;
+            background: var(--darker);
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--gray-light);
+        }
+
+        /* Settings Page */
+        .settings-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info h4 {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .setting-info p {
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        .toggle {
+            width: 48px;
+            height: 26px;
+            background: var(--darker);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle.active {
+            background: var(--primary);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .toggle.active::after {
+            transform: translateX(22px);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-panel {
+                width: 100%;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            min-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 3px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 3px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 3px solid var(--info);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--darker);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--gray);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-4px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    DevOps AI
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Main</div>
+                    <div class="nav-item active" data-page="dashboard">
+                        <i class="fas fa-th-large"></i>
+                        Dashboard
+                    </div>
+                    <div class="nav-item" data-page="tasks">
+                        <i class="fas fa-tasks"></i>
+                        Tasks
+                        <span class="nav-badge" id="task-count">0</span>
+                    </div>
+                    <div class="nav-item" data-page="ai-chat">
+                        <i class="fas fa-comments"></i>
+                        AI Assistant
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">AI Models</div>
+                    <div class="nav-item" data-page="models">
+                        <i class="fas fa-brain"></i>
+                        Model Library
+                    </div>
+                    <div class="nav-item" data-page="settings">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Tools</div>
+                    <div class="nav-item" data-page="analyze">
+                        <i class="fas fa-search"></i>
+                        Log Analyzer
+                    </div>
+                    <div class="nav-item" data-page="fix">
+                        <i class="fas fa-wrench"></i>
+                        Code Fixer
+                    </div>
+                </div>
+            </nav>
+
+            <div class="model-selector">
+                <label>Active AI Model</label>
+                <select class="model-select" id="active-model">
+                    <option value="deepseek-v3">DeepSeek V3 (Recommended)</option>
+                    <option value="gemini-2.0-flash-free">Gemini 2.0 Flash (Free)</option>
+                    <option value="llama-3.1-8b-free">Llama 3.1 8B (Free)</option>
+                    <option value="mistral-7b-free">Mistral 7B (Free)</option>
+                    <option value="llama-3.2-3b-free">Llama 3.2 3B (Free)</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <h1 class="header-title" id="page-title">Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search tasks..." id="search-input">
+                    </div>
+                    <button class="btn btn-primary" id="new-task-btn">
+                        <i class="fas fa-plus"></i>
+                        New Task
+                    </button>
+                    <button class="btn-icon" id="toggle-ai">
+                        <i class="fas fa-robot"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="content" id="main-content">
+                <!-- Dashboard Page -->
+                <div class="page" id="dashboard-page">
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon blue">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="total-tasks">0</div>
+                            <div class="stat-label">Total Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon green">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="completed-tasks">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon yellow">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="pending-tasks">0</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon purple">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="ai-tasks">0</div>
+                            <div class="stat-label">AI Processed</div>
+                        </div>
+                    </div>
+
+                    <div class="task-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-list"></i>
+                                Recent Tasks
+                            </div>
+                            <div class="task-filters">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="pending">Pending</button>
+                                <button class="filter-btn" data-filter="running">Running</button>
+                                <button class="filter-btn" data-filter="completed">Completed</button>
+                            </div>
+                        </div>
+                        <div class="task-list" id="task-list">
+                            <!-- Tasks will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Models Page -->
+                <div class="page" id="models-page" style="display: none;">
+                    <h2 style="margin-bottom: 1.5rem;">AI Model Library</h2>
+                    <p style="color: var(--gray); margin-bottom: 2rem;">Choose from the best free AI models available
+                        through OpenRouter</p>
+                    <div class="models-grid" id="models-grid">
+                        <!-- Models will be rendered here -->
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="page" id="settings-page" style="display: none;">
+                    <div class="settings-section">
+                        <h3 class="settings-title">API Configuration</h3>
+                        <form id="api-key-form" onsubmit="return false;">
+                            <div class="form-group">
+                                <label class="form-label">OpenRouter API Key</label>
+                                <input type="password" class="form-input" id="api-key" placeholder="sk-or-..."
+                                    autocomplete="off">
+                            </div>
+                            <button class="btn btn-primary" id="save-api-key" type="button">Save API Key</button>
+                        </form>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">Preferences</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Auto-execute AI tasks</h4>
+                                <p>Let AI automatically execute certain task types</p>
+                            </div>
+                            <div class="toggle active" id="toggle-auto-execute"></div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Notifications</h4>
+                                <p>Show notifications for task completions</p>
+                            </div>
+                            <div class="toggle active" id="toggle-notifications"></div>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Dark Mode</h4>
+                                <p>Use dark theme (always on)</p>
+                            </div>
+                            <div class="toggle active"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analyze Page -->
+                <div class="page" id="analyze-page" style="display: none;">
+                    <div class="task-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-search"></i>
+                                Log Analyzer
+                            </div>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Paste your log content</label>
+                                <textarea class="form-textarea" id="log-input" rows="10"
+                                    placeholder="Paste error logs here..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Analysis Type</label>
+                                    <select class="form-select" id="analysis-type">
+                                        <option value="full">Full Analysis</option>
+                                        <option value="quick">Quick Analysis</option>
+                                        <option value="hybrid">Hybrid (Python + AI)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Model</label>
+                                    <select class="form-select" id="analysis-model">
+                                        <option value="auto">Auto Select</option>
+                                        <option value="deepseek-r1-free">DeepSeek R1</option>
+                                        <option value="llama-3.3-70b-free">Llama 3.3 70B</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="analyze-btn">
+                                <i class="fas fa-play"></i>
+                                Analyze
+                            </button>
+                            <div id="analysis-result" style="margin-top: 1.5rem;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fix Page -->
+                <div class="page" id="fix-page" style="display: none;">
+                    <div class="task-section">
+                        <div class="section-header">
+                            <div class="section-title">
+                                <i class="fas fa-wrench"></i>
+                                Code Fixer
+                            </div>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label">Code with error</label>
+                                <textarea class="form-textarea" id="code-input" rows="8"
+                                    placeholder="Paste your code here..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Error message</label>
+                                <textarea class="form-textarea" id="error-input" rows="3"
+                                    placeholder="Paste the error message..."></textarea>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Language</label>
+                                    <select class="form-select" id="code-language">
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="typescript">TypeScript</option>
+                                        <option value="java">Java</option>
+                                        <option value="go">Go</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Model</label>
+                                    <select class="form-select" id="fix-model">
+                                        <option value="auto">Auto Select</option>
+                                        <option value="qwen-2.5-coder-32b-free">Qwen 2.5 Coder</option>
+                                        <option value="deepseek-r1-free">DeepSeek R1</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="fix-btn">
+                                <i class="fas fa-magic"></i>
+                                Generate Fix
+                            </button>
+                            <div id="fix-result" style="margin-top: 1.5rem;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- AI Chat Panel -->
+        <div class="ai-panel" id="ai-panel">
+            <div class="ai-header">
+                <div class="ai-title">
+                    <i class="fas fa-robot"></i>
+                    AI Assistant
+                    <span class="ai-status"></span>
+                </div>
+                <button class="btn-icon" id="close-ai">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="ai-messages" id="ai-messages">
+                <div class="message">
+                    <div class="message-header">
+                        <div class="message-avatar ai">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <span class="message-sender">DevOps AI</span>
+                    </div>
+                    <div class="message-content">
+                        Hello! I'm your AI assistant. I can help you with:
+                        <br><br>
+                        • Analyzing logs and errors<br>
+                        • Generating code fixes<br>
+                        • Creating and managing tasks<br>
+                        • Answering DevOps questions<br>
+                        <br>
+                        How can I help you today?
+                    </div>
+                </div>
+            </div>
+            <div class="ai-input-area">
+                <div class="ai-input-wrapper">
+                    <textarea class="ai-input" id="ai-input" placeholder="Ask me anything..." rows="1"></textarea>
+                    <button class="ai-send-btn" id="ai-send">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Task Modal -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Task</h3>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Task Title</label>
+                    <input type="text" class="form-input" id="task-title" placeholder="Enter task title...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="task-description"
+                        placeholder="Describe what needs to be done..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="task-type">
+                            <option value="manual">Manual</option>
+                            <option value="ai-assisted">AI Assisted</option>
+                            <option value="ai-auto">AI Automatic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">AI Instructions (optional)</label>
+                    <textarea class="form-textarea" id="ai-instructions"
+                        placeholder="Specific instructions for AI..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-task">Cancel</button>
+                <button class="btn btn-primary" id="create-task">
+                    <i class="fas fa-plus"></i>
+                    Create Task
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // ========================================================================
+        // State Management
+        // ========================================================================
+        const state = {
+            tasks: [],
+            selectedModel: 'deepseek-v3',
+            apiKey: localStorage.getItem('openrouter_api_key') || '',
+            currentPage: 'dashboard',
+            aiPanelOpen: false
+        };
+
+        // ========================================================================
+        // AI Models Data
+        // ========================================================================
+        const AI_MODELS = [
+            { id: 'deepseek-r1', name: 'DeepSeek R1 (Reasoning)', model: 'deepseek/deepseek-r1', description: 'Best for reasoning-heavy coding, debugging, and multi-step architecture thinking', provider: 'DeepSeek', contextLength: 64000, isFree: true, strengths: ['reasoning', 'debugging', 'coding'] },
+            { id: 'deepseek-r1-free', name: 'DeepSeek R1 (Free)', model: 'deepseek/deepseek-r1:free', description: 'Free tier of DeepSeek R1 - excellent reasoning and coding', provider: 'DeepSeek', contextLength: 64000, isFree: true, strengths: ['reasoning', 'coding', 'debugging'] },
+            { id: 'deepseek-v3', name: 'DeepSeek V3', model: 'deepseek/deepseek-chat', description: 'Fast, good general coding, works well for refactoring', provider: 'DeepSeek', contextLength: 64000, isFree: true, strengths: ['fast', 'coding', 'refactoring'] },
+            { id: 'llama-3.3-70b-free', name: 'Llama 3.3 70B (Free)', model: 'meta-llama/llama-3.3-70b-instruct:free', description: 'Powerful 70B model - excellent for complex reasoning and coding', provider: 'Meta', contextLength: 131072, isFree: true, strengths: ['reasoning', 'coding', 'general'] },
+            { id: 'llama-3.2-3b-free', name: 'Llama 3.2 3B (Free)', model: 'meta-llama/llama-3.2-3b-instruct:free', description: 'Lightweight and fast - great for quick tasks', provider: 'Meta', contextLength: 131072, isFree: true, strengths: ['fast', 'lightweight'] },
+            { id: 'mistral-7b-free', name: 'Mistral 7B (Free)', model: 'mistralai/mistral-7b-instruct:free', description: 'Good Python + JS, lightweight, reliable fallback', provider: 'Mistral', contextLength: 32768, isFree: true, strengths: ['python', 'javascript', 'lightweight'] },
+            { id: 'mistral-small-3.1', name: 'Mistral Small 3.1 (Free)', model: 'mistralai/mistral-small-3.1-24b-instruct:free', description: 'Newer Mistral model with improved capabilities', provider: 'Mistral', contextLength: 128000, isFree: true, strengths: ['coding', 'reasoning', 'multilingual'] },
+            { id: 'qwen-2.5-7b-free', name: 'Qwen 2.5 7B (Free)', model: 'qwen/qwen-2.5-7b-instruct:free', description: 'Strong coding and reasoning capabilities', provider: 'Qwen', contextLength: 32768, isFree: true, strengths: ['coding', 'reasoning'] },
+            { id: 'qwen-2.5-coder-32b-free', name: 'Qwen 2.5 Coder 32B (Free)', model: 'qwen/qwen-2.5-coder-32b-instruct:free', description: 'Specialized for coding tasks - excellent for code generation', provider: 'Qwen', contextLength: 32768, isFree: true, strengths: ['coding', 'code-generation', 'debugging'] },
+            { id: 'gemini-flash-1.5-free', name: 'Gemini Flash 1.5 (Free)', model: 'google/gemini-flash-1.5-8b', description: 'Fast and efficient for general tasks', provider: 'Google', contextLength: 1000000, isFree: true, strengths: ['fast', 'general-purpose', 'multimodal'] },
+            { id: 'gemini-2.0-flash-free', name: 'Gemini 2.0 Flash (Free)', model: 'google/gemini-2.0-flash-exp:free', description: 'Latest Gemini model with improved capabilities', provider: 'Google', contextLength: 1000000, isFree: true, strengths: ['fast', 'reasoning', 'multimodal', 'coding'] },
+            { id: 'phi-4-free', name: 'Phi-4 (Free)', model: 'microsoft/phi-4:free', description: "Microsoft's compact but powerful model", provider: 'Microsoft', contextLength: 16384, isFree: true, strengths: ['reasoning', 'math', 'coding'] },
+            { id: 'claude-3-haiku-free', name: 'Claude 3 Haiku', model: 'anthropic/claude-3-haiku', description: 'Fast and efficient Claude model', provider: 'Anthropic', contextLength: 200000, isFree: true, strengths: ['fast', 'reasoning', 'coding', 'safe'] },
+            { id: 'nous-hermes-free', name: 'Nous Hermes 2 (Free)', model: 'nousresearch/nous-hermes-2-mixtral-8x7b-dpo:free', description: 'Fine-tuned Mixtral with excellent instruction following', provider: 'Nous Research', contextLength: 32768, isFree: true, strengths: ['instruction-following', 'coding', 'creative'] }
+        ];
+
+        // ========================================================================
+        // Configuration
+        // ========================================================================
+        const API_BASE = window.location.origin;
+        const USE_BACKEND = true; // Set to false to use OpenRouter directly
+
+        // ========================================================================
+        // API Functions
+        // ========================================================================
+        async function callBackend(endpoint, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            const response = await fetch(`${API_BASE}${endpoint}`, options);
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Request failed' }));
+                throw new Error(error.error || error.message || 'API request failed');
+            }
+            return await response.json();
+        }
+
+        async function callOpenRouter(messages, model = null) {
+            const selectedModel = model || AI_MODELS.find(m => m.id === state.selectedModel);
+            if (!state.apiKey) {
+                throw new Error('API key not configured. Please add your OpenRouter API key in Settings.');
+            }
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.apiKey}`,
+                    'HTTP-Referer': window.location.origin,
+                    'X-Title': 'DevOps AI Task Manager'
+                },
+                body: JSON.stringify({
+                    model: selectedModel.model,
+                    messages: messages,
+                    max_tokens: 4096
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API request failed');
+            }
+
+            const data = await response.json();
+            return data.choices[0].message.content;
+        }
+
+        async function analyzeLog(logContent, analysisType = 'full', modelId = null) {
+            // Try backend first if available
+            if (USE_BACKEND) {
+                try {
+                    let endpoint = '/api/analyze';
+                    if (analysisType === 'quick') endpoint = '/api/analyze/quick';
+                    if (analysisType === 'hybrid') endpoint = '/api/analyze/hybrid';
+
+                    const result = await callBackend(endpoint, 'POST', {
+                        log: logContent,
+                        modelId: modelId
+                    });
+
+                    if (result.success) {
+                        // Format backend response for display
+                        const analysis = result.analysis || result.combined || result;
+                        return formatAnalysisResult(analysis, result.metadata);
+                    }
+                } catch (error) {
+                    console.warn('Backend analysis failed, falling back to OpenRouter:', error);
+                    // Fall through to OpenRouter
+                }
+            }
+
+            // Fallback to OpenRouter direct
+            const model = modelId ? AI_MODELS.find(m => m.id === modelId) : AI_MODELS.find(m => m.id === state.selectedModel);
+
+            const systemPrompt = `You are an expert DevOps engineer analyzing error logs. Provide:
+1. Error Type Classification
+2. Root Cause Analysis
+3. Affected Components
+4. Step-by-step Fix Suggestions
+5. Prevention Recommendations
+
+Format your response clearly with sections.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Analyze this log:\n\n${logContent}` }
+            ];
+
+            return await callOpenRouter(messages, model);
+        }
+
+        function formatAnalysisResult(analysis, metadata) {
+            let result = `## Analysis Results\n\n`;
+
+            if (analysis.error_type) {
+                result += `### Error Type\n**${analysis.error_type}**\n\n`;
+            }
+
+            if (analysis.root_cause) {
+                result += `### Root Cause\n${analysis.root_cause}\n\n`;
+            }
+
+            if (analysis.confidence) {
+                result += `### Confidence: ${analysis.confidence}%\n\n`;
+            }
+
+            if (analysis.suggested_fix) {
+                result += `### Suggested Fix\n${analysis.suggested_fix}\n\n`;
+            }
+
+            if (analysis.step_by_step_fix && analysis.step_by_step_fix.length > 0) {
+                result += `### Step-by-Step Fix\n`;
+                analysis.step_by_step_fix.forEach((step, i) => {
+                    result += `${i + 1}. ${step}\n`;
+                });
+                result += '\n';
+            }
+
+            if (metadata) {
+                result += `\n---\n*Analysis by: ${metadata.model || 'AI'} in ${metadata.duration || 0}ms*`;
+            }
+
+            return result;
+        }
+
+        async function generateFix(code, errorMessage, language = 'python', modelId = null) {
+            // Try backend first if available
+            if (USE_BACKEND) {
+                try {
+                    const result = await callBackend('/api/fix', 'POST', {
+                        code,
+                        errorMessage,
+                        language,
+                        modelId
+                    });
+
+                    if (result.success && result.fix) {
+                        return formatFixResult(result.fix, result.metadata);
+                    }
+                } catch (error) {
+                    console.warn('Backend fix failed, falling back to OpenRouter:', error);
+                    // Fall through to OpenRouter
+                }
+            }
+
+            // Fallback to OpenRouter direct
+            const model = modelId ? AI_MODELS.find(m => m.id === modelId) : AI_MODELS.find(m => m.id === 'qwen-2.5-coder-32b-free');
+
+            const systemPrompt = `You are an expert programmer. Given code with an error, provide:
+1. Explanation of the error
+2. The corrected code
+3. Why the fix works
+4. Best practices to avoid this error
+
+Format code blocks with proper syntax highlighting.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: `Language: ${language}\n\nCode:\n\`\`\`${language}\n${code}\n\`\`\`\n\nError:\n${errorMessage}` }
+            ];
+
+            return await callOpenRouter(messages, model);
+        }
+
+        function formatFixResult(fix, metadata) {
+            let result = `## Fix Generated\n\n`;
+
+            if (fix.explanation) {
+                result += `### Explanation\n${fix.explanation}\n\n`;
+            }
+
+            if (fix.fixed_code) {
+                result += `### Fixed Code\n\`\`\`\n${fix.fixed_code}\n\`\`\`\n\n`;
+            }
+
+            if (fix.changes && fix.changes.length > 0) {
+                result += `### Changes Made\n`;
+                fix.changes.forEach((change, i) => {
+                    result += `${i + 1}. ${change}\n`;
+                });
+                result += '\n';
+            }
+
+            if (metadata) {
+                result += `\n---\n*Fix generated by: ${metadata.model || 'AI'} in ${metadata.duration || 0}ms*`;
+            }
+
+            return result;
+        }
+
+        async function chatWithAI(userMessage, conversationHistory = []) {
+            // For chat, we use OpenRouter directly as backend may not have chat endpoint
+            const systemPrompt = `You are DevOps AI, an intelligent assistant for DevOps tasks. You can help with:
+- Log analysis and error debugging
+- Code fixes and refactoring
+- Task management and automation
+- DevOps best practices and questions
+
+Be helpful, concise, and technical. Use code blocks when showing code.`;
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...conversationHistory,
+                { role: 'user', content: userMessage }
+            ];
+
+            return await callOpenRouter(messages);
+        }
+
+        // ========================================================================
+        // Backend Status Check
+        // ========================================================================
+        async function checkBackendHealth() {
+            try {
+                const result = await callBackend('/api/health');
+                console.log('Backend health:', result);
+                return result;
+            } catch (error) {
+                console.warn('Backend not available:', error);
+                return null;
+            }
+        }
+
+        async function loadModelsFromBackend() {
+            try {
+                const result = await callBackend('/api/models');
+                if (result.models) {
+                    // Merge backend models with local models
+                    result.models.forEach(model => {
+                        if (!AI_MODELS.find(m => m.id === model.id)) {
+                            AI_MODELS.push(model);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn('Could not load models from backend:', error);
+            }
+        }
+
+        // ========================================================================
+        // Task Management
+        // ========================================================================
+        function createTask(title, description, priority = 'medium', type = 'manual', aiInstructions = '') {
+            const task = {
+                id: Date.now().toString(),
+                title,
+                description,
+                priority,
+                type,
+                aiInstructions,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                completedAt: null,
+                aiProcessed: false
+            };
+            state.tasks.unshift(task);
+            saveTasks();
+            updateUI();
+            return task;
+        }
+
+        function updateTaskStatus(taskId, status) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = status;
+                if (status === 'completed') {
+                    task.completedAt = new Date().toISOString();
+                }
+                saveTasks();
+                updateUI();
+            }
+        }
+
+        function deleteTask(taskId) {
+            state.tasks = state.tasks.filter(t => t.id !== taskId);
+            saveTasks();
+            updateUI();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('devops_ai_tasks', JSON.stringify(state.tasks));
+        }
+
+        function loadTasks() {
+            const saved = localStorage.getItem('devops_ai_tasks');
+            if (saved) {
+                state.tasks = JSON.parse(saved);
+            }
+        }
+
+        // ========================================================================
+        // UI Functions
+        // ========================================================================
+        function updateUI() {
+            updateStats();
+            renderTasks();
+            updateTaskCount();
+        }
+
+        function updateStats() {
+            const total = state.tasks.length;
+            const completed = state.tasks.filter(t => t.status === 'completed').length;
+            const pending = state.tasks.filter(t => t.status === 'pending').length;
+            const aiProcessed = state.tasks.filter(t => t.aiProcessed).length;
+
+            document.getElementById('total-tasks').textContent = total;
+            document.getElementById('completed-tasks').textContent = completed;
+            document.getElementById('pending-tasks').textContent = pending;
+            document.getElementById('ai-tasks').textContent = aiProcessed;
+        }
+
+        function updateTaskCount() {
+            const count = state.tasks.filter(t => t.status !== 'completed').length;
+            document.getElementById('task-count').textContent = count;
+        }
+
+        function renderTasks(filter = 'all') {
+            const taskList = document.getElementById('task-list');
+            let filteredTasks = state.tasks;
+
+            if (filter !== 'all') {
+                filteredTasks = state.tasks.filter(t => t.status === filter);
+            }
+
+            if (filteredTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: var(--gray);">
+                        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                        <p>No tasks found</p>
+                        <p style="font-size: 0.875rem;">Create a new task to get started</p>
+                    </div>
+                `;
+                return;
+            }
+
+            taskList.innerHTML = filteredTasks.map(task => `
+                <div class="task-item" data-id="${task.id}">
+                    <div class="task-checkbox ${task.status === 'completed' ? 'checked' : ''}" onclick="toggleTask('${task.id}')">
+                        ${task.status === 'completed' ? '<i class="fas fa-check"></i>' : ''}
+                    </div>
+                    <div class="task-content">
+                        <div class="task-title ${task.status === 'completed' ? 'completed' : ''}">${task.title}</div>
+                        <div class="task-meta">
+                            <span><i class="fas fa-calendar"></i> ${new Date(task.createdAt).toLocaleDateString()}</span>
+                            <span><i class="fas fa-tag"></i> ${task.type}</span>
+                        </div>
+                    </div>
+                    <span class="task-priority priority-${task.priority}">${task.priority}</span>
+                    <span class="task-status status-${task.status}">${task.status}</span>
+                    <div class="task-actions">
+                        <button class="btn-icon" onclick="runAITask('${task.id}')" title="Run with AI">
+                            <i class="fas fa-robot"></i>
+                        </button>
+                        <button class="btn-icon" onclick="deleteTask('${task.id}')" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderModels() {
+            const grid = document.getElementById('models-grid');
+            grid.innerHTML = AI_MODELS.map(model => `
+                <div class="model-card ${state.selectedModel === model.id ? 'selected' : ''}" onclick="selectModel('${model.id}')">
+                    <div class="model-header">
+                        <div>
+                            <div class="model-provider">${model.provider}</div>
+                            <div class="model-name">${model.name}</div>
+                        </div>
+                        ${model.isFree ? '<span class="model-badge">FREE</span>' : ''}
+                    </div>
+                    <p class="model-description">${model.description}</p>
+                    <div class="model-specs">
+                        <span class="model-spec"><i class="fas fa-database"></i> ${(model.contextLength / 1000).toFixed(0)}K ctx</span>
+                    </div>
+                    <div class="model-tags">
+                        ${model.strengths.slice(0, 3).map(s => `<span class="model-tag">${s}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectModel(modelId) {
+            state.selectedModel = modelId;
+            document.getElementById('active-model').value = modelId;
+            localStorage.setItem('devops_ai_model', modelId);
+            renderModels();
+            showToast('Model selected: ' + modelId, 'success');
+        }
+
+        function toggleTask(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.status = task.status === 'completed' ? 'pending' : 'completed';
+                if (task.status === 'completed') {
+                    task.completedAt = new Date().toISOString();
+                }
+                saveTasks();
+                updateUI();
+            }
+        }
+
+        async function runAITask(taskId) {
+            const task = state.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            updateTaskStatus(taskId, 'running');
+
+            try {
+                const response = await chatWithAI(`Execute this task: ${task.title}\n\nDescription: ${task.description}\n\n${task.aiInstructions ? 'Additional instructions: ' + task.aiInstructions : ''}`);
+                task.aiProcessed = true;
+                task.aiResponse = response;
+                updateTaskStatus(taskId, 'completed');
+                showToast('AI completed the task!', 'success');
+
+                // Show response in AI panel
+                addAIMessage(response);
+                openAIPanel();
+            } catch (error) {
+                updateTaskStatus(taskId, 'pending');
+                showToast('AI task failed: ' + error.message, 'error');
+            }
+        }
+
+        // ========================================================================
+        // AI Chat Functions
+        // ========================================================================
+        let conversationHistory = [];
+
+        function addAIMessage(content, isUser = false) {
+            const messagesContainer = document.getElementById('ai-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : ''}`;
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="message-avatar ${isUser ? 'user' : 'ai'}">
+                        <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
+                    </div>
+                    <span class="message-sender">${isUser ? 'You' : 'DevOps AI'}</span>
+                </div>
+                <div class="message-content">${formatMessage(content)}</div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function formatMessage(content) {
+            // Convert code blocks
+            content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="code-block">$2</pre>');
+            // Convert inline code
+            content = content.replace(/`([^`]+)`/g, '<code style="background: var(--darker); padding: 0.125rem 0.25rem; border-radius: 4px;">$1</code>');
+            // Convert line breaks
+            content = content.replace(/\n/g, '<br>');
+            return content;
+        }
+
+        function addTypingIndicator() {
+            const messagesContainer = document.getElementById('ai-messages');
+            const indicator = document.createElement('div');
+            indicator.id = 'typing-indicator';
+            indicator.className = 'message';
+            indicator.innerHTML = `
+                <div class="message-header">
+                    <div class="message-avatar ai"><i class="fas fa-robot"></i></div>
+                    <span class="message-sender">DevOps AI</span>
+                </div>
+                <div class="message-content">
+                    <div class="typing-indicator"><span></span><span></span><span></span></div>
+                </div>
+            `;
+            messagesContainer.appendChild(indicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typing-indicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('ai-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            addAIMessage(message, true);
+            addTypingIndicator();
+
+            try {
+                const response = await chatWithAI(message, conversationHistory);
+                conversationHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: response }
+                );
+                removeTypingIndicator();
+                addAIMessage(response);
+            } catch (error) {
+                removeTypingIndicator();
+                addAIMessage('Sorry, I encountered an error: ' + error.message);
+            }
+        }
+
+        function openAIPanel() {
+            document.getElementById('ai-panel').classList.add('open');
+            state.aiPanelOpen = true;
+        }
+
+        function closeAIPanel() {
+            document.getElementById('ai-panel').classList.remove('open');
+            state.aiPanelOpen = false;
+        }
+
+        // ========================================================================
+        // Utility Functions
+        // ========================================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+            document.getElementById(`${pageName}-page`).style.display = 'block';
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+
+            const titles = {
+                dashboard: 'Dashboard',
+                tasks: 'Tasks',
+                'ai-chat': 'AI Assistant',
+                models: 'AI Model Library',
+                settings: 'Settings',
+                analyze: 'Log Analyzer',
+                fix: 'Code Fixer'
+            };
+            document.getElementById('page-title').textContent = titles[pageName] || 'Dashboard';
+            state.currentPage = pageName;
+
+            if (pageName === 'models') renderModels();
+        }
+
+        function openModal() {
+            document.getElementById('task-modal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('task-modal').classList.remove('open');
+        }
+
+        // ========================================================================
+        // Event Listeners
+        // ========================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            updateUI();
+
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.dataset.page;
+                    if (page) showPage(page);
+                });
+            });
+
+            // Task Modal
+            document.getElementById('new-task-btn').addEventListener('click', openModal);
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            document.getElementById('cancel-task').addEventListener('click', closeModal);
+            document.getElementById('create-task').addEventListener('click', () => {
+                const title = document.getElementById('task-title').value;
+                const description = document.getElementById('task-description').value;
+                const priority = document.getElementById('task-priority').value;
+                const type = document.getElementById('task-type').value;
+                const aiInstructions = document.getElementById('ai-instructions').value;
+
+                if (!title) {
+                    showToast('Please enter a task title', 'error');
+                    return;
+                }
+
+                createTask(title, description, priority, type, aiInstructions);
+                closeModal();
+
+                // Clear form
+                document.getElementById('task-title').value = '';
+                document.getElementById('task-description').value = '';
+                document.getElementById('ai-instructions').value = '';
+
+                showToast('Task created successfully', 'success');
+
+                // Auto-run AI tasks
+                if (type === 'ai-auto') {
+                    setTimeout(() => runAITask(state.tasks[0].id), 500);
+                }
+            });
+
+            // AI Panel
+            document.getElementById('toggle-ai').addEventListener('click', () => {
+                if (state.aiPanelOpen) closeAIPanel();
+                else openAIPanel();
+            });
+            document.getElementById('close-ai').addEventListener('click', closeAIPanel);
+            document.getElementById('ai-send').addEventListener('click', sendAIMessage);
+            document.getElementById('ai-input').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendAIMessage();
+                }
+            });
+
+            // Model Selector
+            document.getElementById('active-model').addEventListener('change', (e) => {
+                selectModel(e.target.value);
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderTasks(btn.dataset.filter);
+                });
+            });
+
+            // Settings
+            document.getElementById('api-key').value = state.apiKey;
+            document.getElementById('save-api-key').addEventListener('click', () => {
+                state.apiKey = document.getElementById('api-key').value;
+                localStorage.setItem('openrouter_api_key', state.apiKey);
+                showToast('API key saved successfully', 'success');
+            });
+
+            // Toggles
+            document.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    toggle.classList.toggle('active');
+                });
+            });
+
+            // Analyze
+            document.getElementById('analyze-btn').addEventListener('click', async () => {
+                const log = document.getElementById('log-input').value;
+                if (!log) {
+                    showToast('Please enter log content', 'error');
+                    return;
+                }
+
+                const analysisType = document.getElementById('analysis-type').value;
+                const modelId = document.getElementById('analysis-model').value;
+
+                const btn = document.getElementById('analyze-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+
+                try {
+                    const result = await analyzeLog(log, analysisType, modelId === 'auto' ? null : modelId);
+                    document.getElementById('analysis-result').innerHTML = `
+                        <div class="message-content">${formatMessage(result)}</div>
+                    `;
+                    showToast('Analysis complete', 'success');
+                } catch (error) {
+                    showToast('Analysis failed: ' + error.message, 'error');
+                    document.getElementById('analysis-result').innerHTML = `
+                        <div class="message-content" style="color: var(--danger);">
+                            <i class="fas fa-exclamation-triangle"></i> Error: ${error.message}
+                        </div>
+                    `;
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> Analyze';
+            });
+
+            // Fix
+            document.getElementById('fix-btn').addEventListener('click', async () => {
+                const code = document.getElementById('code-input').value;
+                const error = document.getElementById('error-input').value;
+                if (!code || !error) {
+                    showToast('Please enter both code and error message', 'error');
+                    return;
+                }
+
+                const language = document.getElementById('code-language').value;
+                const modelId = document.getElementById('fix-model').value;
+                const btn = document.getElementById('fix-btn');
+                btn.disabled = true;
+                btn.innerHTML = '<div class="spinner"></div> Generating Fix...';
+
+                try {
+                    const result = await generateFix(code, error, language, modelId === 'auto' ? null : modelId);
+                    document.getElementById('fix-result').innerHTML = `
+                        <div class="message-content">${formatMessage(result)}</div>
+                    `;
+                    showToast('Fix generated', 'success');
+                } catch (error) {
+                    showToast('Fix generation failed: ' + error.message, 'error');
+                    document.getElementById('fix-result').innerHTML = `
+                        <div class="message-content" style="color: var(--danger);">
+                            <i class="fas fa-exclamation-triangle"></i> Error: ${error.message}
+                        </div>
+                    `;
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-magic"></i> Generate Fix';
+            });
+
+            // Initialize backend connection
+            checkBackendHealth().then(health => {
+                if (health) {
+                    console.log('Backend connected:', health);
+                    loadModelsFromBackend();
+                } else {
+                    console.log('Running in standalone mode (OpenRouter direct)');
+                }
+            });
+
+            // Load saved model
+            const savedModel = localStorage.getItem('devops_ai_model');
+            if (savedModel) {
+                state.selectedModel = savedModel;
+                document.getElementById('active-model').value = savedModel;
+            }
+        });
+    </script>
+</body>
+
+</html>

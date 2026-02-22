@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 /**
- * DevOps AI CLI - Cline-like Interactive Interface
+ * DevOps AI CLI - Interactive Interface
  * Conversational AI assistant for DevOps tasks
  */
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
@@ -326,7 +326,7 @@ ${a.step_by_step_fix?.length ? `${colors.blue}Step-by-Step:${colors.reset}\n${a.
 // ============================================================================
 // Interactive CLI
 // ============================================================================
-class ClineLikeCLI {
+class DevOpsAICLI {
     constructor() {
         this.projectContext = null;
         this.taskExecutor = null;
@@ -583,7 +583,7 @@ ${colors.dim}Tip: Just describe what you want to do, and I'll help!${colors.rese
 // ============================================================================
 // Entry Point
 // ============================================================================
-const cli = new ClineLikeCLI();
+const cli = new DevOpsAICLI();
 const projectPath = process.argv[2];
 cli.start(projectPath);
 //# sourceMappingURL=cline-cli.js.map

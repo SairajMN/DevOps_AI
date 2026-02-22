@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * DevOps AI CLI - Cline-like Interactive Interface
+ * DevOps AI CLI - Interactive Interface
  * Conversational AI assistant for DevOps tasks
  */
 
@@ -379,7 +379,7 @@ ${a.step_by_step_fix?.length ? `${colors.blue}Step-by-Step:${colors.reset}\n${a.
 // Interactive CLI
 // ============================================================================
 
-class ClineLikeCLI {
+class DevOpsAICLI {
   private rl: readline.Interface;
   private aiClient: AIClient;
   private projectContext: ProjectContext | null = null;
@@ -690,6 +690,6 @@ ${colors.dim}Tip: Just describe what you want to do, and I'll help!${colors.rese
 // Entry Point
 // ============================================================================
 
-const cli = new ClineLikeCLI();
+const cli = new DevOpsAICLI();
 const projectPath = process.argv[2];
 cli.start(projectPath);
